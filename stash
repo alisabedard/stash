@@ -1,45 +1,66 @@
 #!/bin/sh
-
 # Stash (C) 2015-2020 Jeffrey E. Bedard
+
 # Very simple symlink-based package manager
 
 # Set to your desired package location. Install packages in individual
 # prefixes within this directory.
+
 # Configure example for gettext:
 # ./configure --prefix=/opt/gettext-0.20.1; make; make install
+
+# Trace execution.
+#set -x
+
+# Set this to where you wish to install packages.
 STASHDIR=/opt
 # Set this to the destination directory where symlinks should be made.
 PREFIX=/usr/local
+
 get_items()
 {
+    PREV=$PWD # pushd/popd are bashisms
+    cd $STASHDIR/"$1"
     find . | cut -d. -f2- | cut -d/ -f2-
+    cd $PREV
 }
-uninstall()
+uninstall_package()
 {
-    cd $STASHDIR/$1
-    CONTENTS=`mktemp`
-    get_items > $CONTENTS
-    cd $PREFIX
-    xargs -a $CONTENTS rm -f 2> /dev/null
-    cat $CONTENTS
-    rm $CONTENTS
+    for ARG in $@; do
+        for ITEM in `get_items "$ARG"`; do
+            if [ -f $PREFIX/"$ITEM" ]; then
+                echo rm $PREFIX/"$ITEM"
+                rm $PREFIX/"$ITEM"
+            fi
+        done
+    done
 }
-if [ ! "$1" ]; then # list available stash packages
+install_package()
+{
+    for ARG in $@; do
+        uninstall_package "$ARG"
+        for ITEM in `get_items "$ARG"`; do
+            if [ -d $PREFIX/"$ITEM" ]; then
+                echo "mkdir -p $PREFIX/$ITEM"
+                mkdir -p $PREFIX/"$ITEM"
+            else
+                echo "ln -s $STASHDIR/$ARG/$ITEM $PREFIX/$ITEM"
+                ln -s $STASHDIR/$ARG/"$ITEM" $PREFIX/"$ITEM"
+            fi
+        done
+    done
+}
+OPTIONS=`getopt -- hr: "$@"` || exit 1
+eval set -- "$OPTIONS"
+while true; do
+    case "$1" in
+        -h) echo "stash -[hr:]"; shift;;
+        -r) uninstall_package $2; shift 2;;
+        --) shift; break;;
+    esac
+done
+if [ $# -gt 0 ]; then
+    install_package $@
+else
     ls $STASHDIR
-elif [ "$1" = "-a" ]; then # stash all
-    for DIR in $STASHDIR; do
-        stash $DIR
-    done
-elif [ "$1" = "-r" ]; then # remove
-    uninstall $2
-else # install
-    stash -r $1
-    cd $STASHDIR/$1
-    for I in `get_items`; do
-        if [ -d "$I" ]; then
-            mkdir -p $PREFIX/$I
-        else
-            ln -s $STASHDIR/$1/$I $PREFIX/$I
-        fi
-    done
 fi
