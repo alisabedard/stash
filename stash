@@ -42,6 +42,7 @@ install_package()
 {
     for ARG in $@; do
         for ITEM in `get_items "$ARG"`; do
+	    ITEM=`echo $ITEM | sed 's/\s/\\ /g'`
             if [ -d $STASH/$ARG/"$ITEM" ]; then
                 mkdir -p $DEST/"$ITEM"
             else
