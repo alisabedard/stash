@@ -1,18 +1,12 @@
 #!/bin/sh
 # Stash (C) 2015-2020 Jeffrey E. Bedard
-
-# Very simple symlink-based package manager
-
-# Set to your desired package location. Install packages in individual
-# prefixes within this directory.
-
-# Configure example for gettext:
-# ./configure --prefix=/opt/gettext-0.20.1; make; make install
+# This is a very simple symlink-based package manager.
 
 # Trace execution.
 #set -x
 
-# Set this to where you wish to install packages in individual directories.
+# Set to your desired package location. Install packages in individual
+# prefixes within this directory.
 STASH=/opt
 # Set this to the destination directory where symlinks should be made.
 DEST=/usr/local
