@@ -12,15 +12,15 @@
 # Trace execution.
 #set -x
 
-# Set this to where you wish to install packages.
-STASHDIR=/opt
+# Set this to where you wish to install packages in individual directories.
+STASH=/opt
 # Set this to the destination directory where symlinks should be made.
-PREFIX=/usr/local
+DEST=/usr/local
 
 get_items()
 {
     PREV=$PWD # pushd/popd are bashisms
-    SRC=$STASHDIR/"$1"
+    SRC=$STASH/"$1"
     if [ -d "$SRC" ]; then
         cd "$SRC"
         find . | cut -d. -f2- | cut -d/ -f2-
@@ -31,8 +31,8 @@ uninstall_package()
 {
     for ARG in $@; do
         for ITEM in `get_items "$ARG"`; do
-            if [ -L $PREFIX/"$ITEM" ]; then
-                rm $PREFIX/"$ITEM"
+            if [ -L $DEST/"$ITEM" ]; then
+                rm $DEST/"$ITEM"
             fi
         done
     done
@@ -40,12 +40,12 @@ uninstall_package()
 install_package()
 {
     for ARG in $@; do
-        uninstall_package "$ARG"
         for ITEM in `get_items "$ARG"`; do
-            if [ -d $PREFIX/"$ITEM" ]; then
-                mkdir -p $PREFIX/"$ITEM"
+            if [ -d $STASH/"$ITEM" ]; then
+                mkdir -p $DEST/"$ITEM"
             else
-                ln -sf $STASHDIR/$ARG/"$ITEM" $PREFIX/"$ITEM"
+                rm -f $STASH/"$ITEM" # Remove conflicts
+                ln -s $STASH/$ARG/"$ITEM" $DEST/"$ITEM"
             fi
         done
     done
@@ -56,7 +56,7 @@ eval set -- "$OPTIONS"
 while true; do
     case "$1" in
         -h) echo "stash -[$OPTSTRING]"; shift;;
-        -l) ls $STASHDIR; shift;;
+        -l) ls $STASH; shift;;
         -r) uninstall_package $2; shift 2;;
         --) shift; install_package $@; break;;
     esac
