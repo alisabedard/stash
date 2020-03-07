@@ -44,7 +44,7 @@ install_package()
                 echo "mkdir -p $PREFIX/$ITEM"
                 mkdir -p $PREFIX/"$ITEM"
             else
-                echo "ln -s $STASHDIR/$ARG/$ITEM $PREFIX/$ITEM"
+                echo "ln -sf $STASHDIR/$ARG/$ITEM $PREFIX/$ITEM"
                 ln -sf $STASHDIR/$ARG/"$ITEM" $PREFIX/"$ITEM"
             fi
         done
