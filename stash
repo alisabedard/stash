@@ -32,6 +32,7 @@ uninstall_package()
     for ARG in $@; do
         for ITEM in `get_items "$ARG"`; do
             if [ -L $DEST/"$ITEM" ]; then
+                echo rm $DEST/"$ITEM"
                 rm $DEST/"$ITEM"
             fi
         done
@@ -41,11 +42,11 @@ install_package()
 {
     for ARG in $@; do
         for ITEM in `get_items "$ARG"`; do
-            if [ -d $STASH/"$ITEM" ]; then
+            if [ -d $STASH/$ARG/"$ITEM" ]; then
                 mkdir -p $DEST/"$ITEM"
             else
                 rm -f $DEST/"$ITEM" # Remove conflicts
-                ln -s $STASH/$ARG/"$ITEM" $DEST/"$ITEM"
+                ln -sv $STASH/$ARG/"$ITEM" $DEST/"$ITEM"
             fi
         done
     done
