@@ -29,6 +29,7 @@ get_items()
 }
 uninstall_package()
 {
+    local IFS=$'\n'
     for ARG in $@; do
         for ITEM in `get_items "$ARG"`; do
             if [ -L $DEST/"$ITEM" ]; then
@@ -40,6 +41,7 @@ uninstall_package()
 }
 install_package()
 {
+    local IFS=$'\n'
     for ARG in $@; do
         for ITEM in `get_items "$ARG"`; do
 	    ITEM=`echo $ITEM | sed 's/\s/\\ /g'`
