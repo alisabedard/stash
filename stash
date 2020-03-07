@@ -19,8 +19,8 @@ DEST=/usr/local
 
 get_items()
 {
-    PREV=$PWD # pushd/popd are bashisms
-    SRC=$STASH/"$1"
+    local PREV=$PWD # pushd/popd are bashisms
+    local SRC=$STASH/"$1"
     if [ -d "$SRC" ]; then
         cd "$SRC"
         find . | cut -d. -f2- | cut -d/ -f2-
@@ -54,11 +54,23 @@ install_package()
         done
     done
 }
-OPTSTRING="hlr:"
+build_install()
+{
+    local PREV=$PWD
+    local SRCDIR=`tar xvf $1 | tail -n 1 | cut -d/ -f1`
+    cd $SRCDIR
+    ./configure --prefix=$STASH/$SRCDIR
+    make -j8
+    make install
+    stash $SRCDIR
+    cd $PREV
+}
+OPTSTRING="b:hlr:"
 OPTIONS=`getopt -- $OPTSTRING "$@"` || exit 1
 eval set -- "$OPTIONS"
 while true; do
     case "$1" in
+        -b) build_install $2; shift;;
         -h) echo "stash -[$OPTSTRING]"; shift;;
         -l) ls $STASH; shift;;
         -r) uninstall_package $2; shift 2;;
