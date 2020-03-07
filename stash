@@ -44,7 +44,7 @@ install_package()
             if [ -d $STASH/"$ITEM" ]; then
                 mkdir -p $DEST/"$ITEM"
             else
-                rm -f $STASH/"$ITEM" # Remove conflicts
+                rm -f $DEST/"$ITEM" # Remove conflicts
                 ln -s $STASH/$ARG/"$ITEM" $DEST/"$ITEM"
             fi
         done
