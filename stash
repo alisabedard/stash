@@ -20,15 +20,18 @@ PREFIX=/usr/local
 get_items()
 {
     PREV=$PWD # pushd/popd are bashisms
-    cd $STASHDIR/"$1"
-    find . | cut -d. -f2- | cut -d/ -f2-
-    cd $PREV
+    SRC=$STASHDIR/"$1"
+    if [ -d "$SRC" ]; then
+        cd "$SRC"
+        find . | cut -d. -f2- | cut -d/ -f2-
+        cd $PREV
+    fi
 }
 uninstall_package()
 {
     for ARG in $@; do
         for ITEM in `get_items "$ARG"`; do
-            if [ -f $PREFIX/"$ITEM" ]; then
+            if [ -L $PREFIX/"$ITEM" ]; then
                 echo rm $PREFIX/"$ITEM"
                 rm $PREFIX/"$ITEM"
             fi
@@ -41,26 +44,21 @@ install_package()
         uninstall_package "$ARG"
         for ITEM in `get_items "$ARG"`; do
             if [ -d $PREFIX/"$ITEM" ]; then
-                echo "mkdir -p $PREFIX/$ITEM"
                 mkdir -p $PREFIX/"$ITEM"
             else
-                echo "ln -sf $STASHDIR/$ARG/$ITEM $PREFIX/$ITEM"
                 ln -sf $STASHDIR/$ARG/"$ITEM" $PREFIX/"$ITEM"
             fi
         done
     done
 }
-OPTIONS=`getopt -- hr: "$@"` || exit 1
+OPTSTRING="hlr:"
+OPTIONS=`getopt -- $OPTSTRING "$@"` || exit 1
 eval set -- "$OPTIONS"
 while true; do
     case "$1" in
-        -h) echo "stash -[hr:]"; shift;;
+        -h) echo "stash -[$OPTSTRING]"; shift;;
+        -l) ls $STASHDIR; shift;;
         -r) uninstall_package $2; shift 2;;
-        --) shift; break;;
+        --) shift; install_package $@; break;;
     esac
 done
-if [ $# -gt 0 ]; then
-    install_package $@
-else
-    ls $STASHDIR
-fi
