@@ -32,7 +32,6 @@ uninstall_package()
     for ARG in $@; do
         for ITEM in `get_items "$ARG"`; do
             if [ -L $PREFIX/"$ITEM" ]; then
-                echo rm $PREFIX/"$ITEM"
                 rm $PREFIX/"$ITEM"
             fi
         done
