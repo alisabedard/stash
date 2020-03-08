@@ -48,23 +48,28 @@ install_package()
         done
     done
 }
+configure_sources()
+{
+    ./configure --prefix=$STASH/`basename $PWD`
+}
 build_install()
 {
     local PREV=$PWD
     local SRCDIR=`tar xvf $1 | tail -n 1 | cut -d/ -f1`
     cd $SRCDIR
-    ./configure --prefix=$STASH/$SRCDIR
+    configure_sources
     make -j8
     make install
     stash $SRCDIR
     cd $PREV
 }
-OPTSTRING="b:hlr:"
+OPTSTRING="b:chlr:"
 OPTIONS=`getopt -- $OPTSTRING "$@"` || exit 1
 eval set -- "$OPTIONS"
 while true; do
     case "$1" in
         -b) build_install $2; shift 2;;
+        -c) configure_sources; shift 2;;
         -h) echo "stash -[$OPTSTRING]"; shift;;
         -l) ls $STASH; shift;;
         -r) uninstall_package $2; shift 2;;
