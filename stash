@@ -33,6 +33,13 @@ uninstall_package()
         done
     done
 }
+remove_package()
+{
+    for ARG in $@; do
+        uninstall_package "$ARG"
+        rm -rf $STASH/$ARG
+    done
+}
 install_package()
 {
     local IFS=$'\n'
@@ -63,11 +70,12 @@ build_install()
     stash $SRCDIR
     cd $PREV
 }
-OPTSTRING="b:chlr:"
+OPTSTRING="R:b:chlr:"
 OPTIONS=`getopt -- $OPTSTRING "$@"` || exit 1
 eval set -- "$OPTIONS"
 while true; do
     case "$1" in
+        -R) remove_package $2; shift 2;;
         -b) build_install $2; shift 2;;
         -c) configure_sources; shift 2;;
         -h) echo "stash -[$OPTSTRING]"; shift;;
