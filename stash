@@ -1,5 +1,5 @@
 #!/bin/sh
-# Stash (C) 2015-2020 Jeffrey E. Bedard
+# Stash (C) 2015-2020 Alisa Bedard
 # This is a very simple symlink-based package manager.
 
 # Trace execution.
